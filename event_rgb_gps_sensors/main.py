@@ -64,10 +64,10 @@ def check_runtime(start_time, hours_prev):
         return hours_prev
 
 # dedicated CPU thread for RGB and GPS data processing
-def rgb_gps_thread():
+def rgb_gps_thread(port):
     print('RGB GPS thread has began')
     # define variables
-    cam_port = 2
+    cam_port = port
     width = 1280
     height = 720
     hours_prev = 0
@@ -220,7 +220,7 @@ def event_thread():
     stream.stop_log_raw_data()
     print('Event thread has ended')
 
-def main():
+def main(argv):
     # create directory to save data for this run
     print('Creating data directory {}'.format(folder_path))
     if not os.path.exists(folder_path):
@@ -233,7 +233,7 @@ def main():
     # pass functions to executor to parallel run
     futures = list()
     futures.append(executor.submit(event_thread))
-    futures.append(executor.submit(rgb_gps_thread))
+    futures.append(executor.submit(rgb_gps_thread, int(argv[1])))
     done, not_done = wait(futures, return_when = concurrent.futures.ALL_COMPLETED)
     print('All concurrent futures have completed')
 
@@ -242,4 +242,4 @@ def main():
     print('Executor has shutdown')
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv)
