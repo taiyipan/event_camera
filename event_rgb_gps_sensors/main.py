@@ -24,6 +24,8 @@ bias_hpf = 30
 bias_diff_off = 40
 bias_diff_on = 40
 bias_refr = 0
+band_min, band_max = 50, 500
+trail_threshold = 100000
 erc_max = 10000000
 
 # toggle program behavior
@@ -156,11 +158,11 @@ def event_thread():
     # AFK: anti-flicker
     anti_flicker = device.get_i_antiflicker_module()
     anti_flicker.enable()
-    anti_flicker.set_frequency_band(50, 500, True) # Hz
+    anti_flicker.set_frequency_band(band_min, band_max, True) # Hz
 
     # STC/Trail: event trail filter
     noise_filter = device.get_i_noisefilter_module()
-    noise_filter.enable_trail(1000) # microseconds
+    noise_filter.enable_trail(trail_threshold) # microseconds; 100ms
 
     # ERC: event rate controller
     erc = device.get_i_erc()

@@ -38,7 +38,7 @@ def main():
     device.get_i_antiflicker_module().set_frequency_band(50, 500, True)
 
     # STC/Trail: event trail filter
-    device.get_i_noisefilter_module()
+    device.get_i_noisefilter_module().enable_trail(100000)
 
     # ERC: event rate controller
     device.get_i_erc().enable(True)
