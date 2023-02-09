@@ -43,8 +43,8 @@ def main():
     # ERC: event rate controller
     device.get_i_erc().enable(True)
     device.get_i_erc().set_cd_event_rate(10000000)
-    print(device.get_i_erc().is_enabled())
-    print(device.get_i_erc().get_cd_event_rate())
+    # print(device.get_i_erc().is_enabled())
+    # print(device.get_i_erc().get_cd_event_rate())
 
     # create iterator
     iterator = EventsIterator.from_device(device = device, delta_t=1e3)

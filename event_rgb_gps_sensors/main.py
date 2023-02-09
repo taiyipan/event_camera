@@ -28,8 +28,8 @@ band_min, band_max = 50, 500
 trail_threshold = 100000
 erc_max = 10000000
 
-# toggle program behavior
-runtime_limit = False # if true, threads will only run for 30 minutes, then end
+# define program behavior
+event_time_limit = 10 # minutes; define maximum time limit for raw event data file in order to reduce file size 
 
 # global directory path
 folder_path = 'sensor_data_{}'.format(datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
@@ -65,6 +65,12 @@ def check_runtime(start_time, hours_prev):
     else:
         return hours_prev
 
+def event_block(t0):
+    t1 = datetime.now()
+    if t1 > t0 + timedelta(minutes = event_time_limit):
+        return t1, True 
+    return t0, False 
+
 # dedicated CPU thread for RGB and GPS data processing
 def rgb_gps_thread(port):
     print('RGB GPS thread has began')
@@ -86,7 +92,10 @@ def rgb_gps_thread(port):
         exit()
 
     # open gps object
-    gps, port = gps_object()
+    try:
+        gps, port = gps_object()
+    except:
+        print(traceback.format_exc())
 
     try:
         # obtain start time string
@@ -119,8 +128,9 @@ def rgb_gps_thread(port):
                 geo.headMot,
                 time_str
             ))
-            # display frame
-            cv.imshow('ELP RGB Camera', np.zeros((200, 400)))
+            # display dummy frame
+            dummy = np.zeros((200, 400))
+            cv.imshow('ELP RGB Camera', dummy)
             # escape protocol
             k = cv.waitKey(1)
             if k%256 == 27: # ESC pressed
@@ -203,11 +213,21 @@ def event_thread():
 
         # obtain start time string
         start_str = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        # create event directory 
+        if not os.path.exists('{}/data_{}'.format(folder_path, start_str)):
+            os.mkdir('{}/data_{}'.format(folder_path, start_str))
         # begin event log
-        stream.log_raw_data('{}/data_{}.raw'.format(folder_path, start_str))
+        t0 = datetime.now()
+        stream.log_raw_data('{}/data_{}/event_{}.raw'.format(folder_path, start_str, t0.strftime('%Y-%m-%d_%H-%M-%S')))
 
         # Process event batches
         for evs in iterator:
+            # block size check; create new save file if over size limit 
+            t0, over = event_block(t0)
+            if over:
+                stream.stop_log_raw_data()
+                stream.log_raw_data('{}/data_{}/event_{}.raw'.format(folder_path, start_str, t0.strftime('%Y-%m-%d_%H-%M-%S')))
+                print('{} minute event block saved at {}'.format(event_time_limit, t0))
             # calculate event rate
             display_str = "Rate : {:.2f}Mev/s".format(evs.size * 1e-3)
             # Dispatch system events to the window
@@ -223,12 +243,19 @@ def event_thread():
     print('Event thread has ended')
 
 def main(argv):
+    try: 
+        int(argv[1])
+    except:
+        print('Please specify RGB camera port')
+        exit()
+
     # create directory to save data for this run
     print('Creating data directory {}'.format(folder_path))
     if not os.path.exists(folder_path):
         os.mkdir(folder_path)
 
     # define multiprocessing program executor
+    print('CPU core count: {}'.format(cpu_count()))
     executor = ProcessPoolExecutor(cpu_count() - 1)
     print('Started Process Pool Executor...')
 
