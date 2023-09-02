@@ -1,8 +1,8 @@
 #!/bin/bash
 # define paths 
-raw=/home/taiyi/scratch/data
+raw=/home/taiyi/scratch2/NYU-EventVPR
 event=/home/taiyi/scratch/event_rendered/10fps
-output=/home/taiyi/scratch/NYU-EventVPR-Event/
+output=/home/taiyi/scratch/NYU-EventVPR-Event
 # purge previous output directory 
 rm -r $output 
 echo "Purged previous dataset directory"
@@ -13,9 +13,9 @@ python /home/taiyi/scratch/event_dataset_generation/main.py \
        --rdir $raw \
        --dir $output \
        --edir $event \
-       --tolerance 10 \
+       --tolerance 25 \
        --sobel 100 \
-       --reduce 0.8 \
+       --reduce 1.0 \
        --sample 0.1 \
-       --framerate 10 \
+       --framerate 1 \
        --synched 0
