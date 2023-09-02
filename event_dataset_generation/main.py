@@ -109,7 +109,7 @@ if __name__ == '__main__':
     assert args.dir is not None 
     assert args.edir is not None 
     assert args.tolerance > 0
-    assert args.sobel > 0 
+    assert args.sobel >= 0 
     assert args.reduce > 0 and args.reduce <= 1
     assert args.sample > 0 and args.sample <= 1 
     assert args.framerate > 0
