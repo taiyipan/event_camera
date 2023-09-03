@@ -2,10 +2,10 @@
 
 # define hyperparams
 fault_tolerance=25
-sobel_threshold=100
+sobel_threshold=0
 sample_fps=1
 type="event" # choices: event, reconstructed
-light="day" # choices: day, night, null
+light="null" # choices: day, night, null
 
 #############################################################################################################################################
 # define paths 
@@ -55,6 +55,7 @@ echo $files
 # purge previous output directory 
 rm -r $event
 rm -r $output 
+mkdir $event 
 echo "Purged previous dataset directories"
 
 ########################################################
